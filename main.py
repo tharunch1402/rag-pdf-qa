@@ -38,15 +38,48 @@ def get_splitters(documents):
 
     return chunks
 
+
+from langchain_openai import OpenAIEmbeddings
+from config import settings
+
+
+def get_embedding_model():
+
+    if not settings.OPENAI_API_KEY:
+        raise ValueError('api key not found')
+
+    embedding_model = OpenAIEmbeddings(api_key = settings.OPENAI_API_KEY,
+                                       model = 'text-embedding-3-small')
+
+    return embedding_model
+
+from langchain_chroma import Chroma
+
+
+def vector_stores(chunks):
+
+    embedding_model = get_embedding_model()
+
+    vector_store = Chroma.from_documents(embedding = embedding_model,
+                          documents = chunks,
+                          persist_directory = './chroma_db',
+                          collection_name = 'Production_RAG')
+
+    return vector_store
+
 if __name__ == '__main__':
     documents = get_load_document('data/sample.pdf')
     chunks = get_splitters(documents)
+    vector_stores = vector_stores(chunks)
+
 
     print('Pages loaded:', len(documents))
     print('Total chunks:', len(chunks))
-    print('\n--- Chunk 1 ---\n', chunks[0].page_content)
-    print('\nMetadata:', chunks[0].metadata)
 
+    # Test the search (change this to a question from YOUR PDF)
+    question = 'What is this document about?'
+    results = vector_stores.similarity_search(question, k=3)
 
-
-
+    for i, doc in enumerate(results, start=1):
+        print(f"\n--- Result {i} (page {doc.metadata.get('page')}) ---")
+        print(doc.page_content[:300])
