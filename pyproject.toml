@@ -1,0 +1,13 @@
+[project]
+name = "rag-pdf-qa"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "langchain>=1.4.7",
+    "langchain-classic>=1.0.8",
+    "langchain-community>=0.4.2",
+    "langchain-core>=1.7.3",
+    "langchain-openai>=1.7.3",
+    "pypdf>=6.21.4",
+    "python-dotenv>=1.2.4",
+]
